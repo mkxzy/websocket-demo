@@ -14,44 +14,51 @@
     <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script type="text/javascript">
         // 建立连接对象（还未发起连接）
-        var socket = new SockJS("/websocket");
+        var socket = new SockJS("http://localhost:8080/websocket");
 
         // 获取 STOMP 子协议的客户端对象
         var stompClient = Stomp.over(socket);
 
         // 向服务器发起websocket连接并发送CONNECT帧
-        stompClient.connect(
-            {},
-            function connectCallback(frame) {
+        stompClient.connect({}, function connectCallback(frame) {
                 // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
-                setMessageInnerHTML("连接成功");
-                stompClient.subscribe('/app/subscribeTest2', function (response) {
-                    setMessageInnerHTML("已成功订阅/app/subscribeTest2");
+                console.log('fuck');
+//                setMessageInnerHTML("连接成功");
+                stompClient.subscribe('/app/xxx', function (response) {
+                    setMessageInnerHTML("已成功订阅/app/xxx");
                     var returnData = JSON.parse(response.body);
-                    setMessageInnerHTML("/app/subscribeTest2 你接收到的消息为:" + returnData.responseMessage);
+                    setMessageInnerHTML("/app/xxx 你接收到的消息为:" + returnData.responseMessage);
                 });
             },
             function errorCallBack(error) {
                 // 连接失败时（服务器响应 ERROR 帧）的回调方法
                 setMessageInnerHTML("连接失败");
-            }
-        );
+            });
 
         //发送消息
         function send() {
             var message = document.getElementById('text').value;
             var messageJson = JSON.stringify({ "name": message });
-            stompClient.send("/app/sendTest2", {}, messageJson);
-            setMessageInnerHTML("/app/sendTest2 你发送的消息:" + message);
+            stompClient.send("/app/xxx", {}, messageJson);
+            setMessageInnerHTML("/app/xxx 你发送的消息:" + message);
         }
 
         //订阅消息
         function subscribe1() {
-            stompClient.subscribe('/queue/xxx', function (response) {
-                setMessageInnerHTML("已成功订阅/queue/xxx");
+            var topic = '/topic/a/fuck';
+            stompClient.subscribe(topic, function (response) {
+                console.log(response);
+                setMessageInnerHTML("已成功订阅" + topic);
                 var returnData = JSON.parse(response.body);
-                setMessageInnerHTML("/queue/xxx 你接收到的消息为:" + returnData.responseMessage);
+                setMessageInnerHTML(topic + " 你接收到的消息为:" + returnData.responseMessage);
             });
+        }
+
+        function subUser() {
+            stompClient.subscribe('/user/' + 'mike' + '/message', function(message){
+                var messageEntity = JSON.parse(message.body);
+            });
+
         }
 
         //将消息显示在网页上
